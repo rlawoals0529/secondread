@@ -1,117 +1,325 @@
-/**
- * Colours and type from yozora, vendored rather than imported, so this page has no dependency
- * on a sibling repository being reachable. The palette is its "rain lantern" variant.
- */
+@import "./yozora/base.css";
+@import "./yozora/palettes.css";
+@import "./yozora/texture.css";
+@import "./yozora/motion.css";
+@import "./fonts.css";
+
+/* ------------------------------------------------------------------------------------------
+   Chrome for this app. Every colour is a yozora token, so switching palette cannot leave a
+   hardcoded value behind fighting the new one. Fifteen palettes is fifteen chances to find out
+   you wrote a hex somewhere.
+   ------------------------------------------------------------------------------------------ */
+
 :root {
-  --bg: #14161d;
-  --panel: #1b1e27;
-  --line: #2a2e3a;
-  --ink: #d7dae4;
-  --dim: #8f96a8;
-  --accent: #7fb3d5;
-  --warn: #e0a45e;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  color-scheme: dark;
+  --font-display: "Archivo", "Segoe UI Variable Display", system-ui, sans-serif;
+  --font-body: "Archivo", "Segoe UI Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* The hard offset shadow that makes a control look pressable rather than printed. No blur:
+     blur reads as elevation, offset reads as a physical edge, and this is the second one. */
+  --lift: 4px;
+  --edge-w: 2px;
 }
 
-* { box-sizing: border-box; }
+body { font-family: var(--font-body); }
+code, pre, .mono { font-family: var(--font-mono); }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  text-wrap: pretty;
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
 }
 
-main { max-width: 62rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
-
-h1 { font-size: 1.6rem; margin: 0 0 .3rem; letter-spacing: -.01em; }
-h2 { font-size: 1rem; margin: 2.5rem 0 .5rem; font-weight: 600; text-wrap: balance; }
-.tagline { color: var(--dim); margin: 0 0 2rem; max-width: 46rem; }
-.note { color: var(--dim); font-size: .87rem; margin: .2rem 0 1rem; max-width: 50rem; }
-
-.editor-head {
-  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-  font-size: .8rem; color: var(--dim); margin-bottom: .4rem; flex-wrap: wrap;
+/* A skip link that is genuinely reachable, not one that stays off screen because somebody
+   tested it by looking rather than by pressing Tab. */
+.skip {
+  position: absolute; left: 0.5rem; top: -4rem; z-index: 100;
+  background: var(--accent); color: var(--bg);
+  padding: 0.6rem 1rem; border-radius: var(--radius); font-weight: 600;
+  transition: top 120ms ease;
 }
-.samples { display: flex; gap: .5rem; }
-.samples button {
-  background: none; border: 1px solid var(--line); color: var(--dim);
-  padding: .2rem .6rem; border-radius: 5px; cursor: pointer; font-size: .8rem;
-  min-height: 28px;
+.skip:focus { top: 0.5rem; }
+/* The stage takes focus from the skip link but is not a control, so it gets no ring of its own.
+   Removing the outline is only safe because focus lands here on purpose and moves straight on. */
+.stage:focus { outline: none; }
+
+/* One focus style everywhere, and it is never removed. */
+:where(a, button, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
-.samples button:hover { color: var(--ink); border-color: var(--accent); }
+
+/* ---- Shell ------------------------------------------------------------------------------- */
+
+.shell {
+  display: grid;
+  grid-template-columns: minmax(15rem, 19rem) minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2.5rem);
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  min-height: 100dvh;
+  align-items: start;
+}
+
+.rail { position: sticky; top: clamp(1.25rem, 3vw, 2.5rem); display: grid; gap: 1.25rem; }
+
+.brand h1 {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight, 700);
+  letter-spacing: var(--display-tracking, -0.6px);
+  line-height: var(--display-leading, 1.05);
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  color: var(--fg);
+}
+.brand .sub { color: var(--dim); margin-top: 0.35rem; font-size: 0.92rem; }
+
+/* ---- The menu buttons -------------------------------------------------------------------- */
+
+.tabs { display: grid; gap: 0.6rem; }
+
+.menu-btn {
+  --btn-bg: var(--panel);
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: var(--btn-bg);
+  color: var(--fg);
+  border: var(--edge-w) solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--lift) var(--lift) 0 0 var(--edge);
+  font: inherit; font-weight: 600; text-align: left;
+  cursor: pointer;
+  /* Named properties only. `transition: all` would animate layout and the box-shadow colour
+     change on palette switch, which flashes every control on the page. */
+  transition: transform 90ms ease, box-shadow 90ms ease, background-color 140ms ease,
+              border-color 140ms ease;
+}
+.menu-btn:hover { --btn-bg: var(--raised); }
+
+/* Press moves the control onto its own shadow. The travel equals the offset, so the control
+   lands exactly where the shadow was rather than approximately. */
+.menu-btn:active { transform: translate(var(--lift), var(--lift)); box-shadow: 0 0 0 0 var(--edge); }
+
+.menu-btn[aria-selected="true"] {
+  --btn-bg: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  box-shadow: var(--lift) var(--lift) 0 0 var(--edge);
+}
+.menu-btn.wide { justify-content: center; }
+.menu-btn-label { font-size: 1rem; }
+
+.badge {
+  min-width: 1.6rem; padding: 0.05rem 0.4rem;
+  background: var(--bg); color: var(--fg);
+  border: 1px solid var(--edge); border-radius: 999px;
+  font-size: 0.78rem; font-variant-numeric: tabular-nums; text-align: center;
+}
+.menu-btn[aria-selected="true"] .badge { background: var(--bg); color: var(--accent); border-color: var(--bg); }
+
+.rail-foot { display: grid; gap: 0.4rem; font-size: 0.83rem; color: var(--dim); }
+.status { font-variant-numeric: tabular-nums; }
+.src { color: var(--accent); }
+
+/* ---- Stage ------------------------------------------------------------------------------- */
+
+.stage { min-width: 0; }
+/* Ours, not yozora's `.panel`, which is a surface style with its own padding and inset border.
+   Reusing that name meant the stage silently inherited a card's chrome. */
+.tabpanel:focus-visible { outline-offset: 6px; }
+.stack { display: grid; gap: 1rem; align-content: start; }
+.row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.row-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* base.css styles h2 as a small uppercase label. These are section headings, so the transform
+   and tracking are reset explicitly rather than left to cascade through. */
+h2 {
+  font-family: var(--font-display); font-size: 1.25rem; color: var(--fg);
+  text-transform: none; letter-spacing: var(--display-tracking, -0.4px); font-weight: 700;
+}
+h3 {
+  font-family: var(--font-display); font-size: 1.02rem; margin-top: 1.6rem; color: var(--fg);
+  text-transform: none; letter-spacing: normal;
+}
+.hint { color: var(--dim); font-size: 0.9rem; max-width: 46rem; }
+.hint.error { color: var(--err); }
+
+.pill {
+  background: transparent; color: var(--dim);
+  border: 1px solid var(--edge); border-radius: 999px;
+  padding: 0.25rem 0.8rem; font: inherit; font-size: 0.83rem; cursor: pointer;
+  min-height: 32px;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.pill:hover { color: var(--fg); border-color: var(--accent); }
+.pill.quiet { cursor: default; }
 
 textarea {
-  width: 100%; min-height: 15rem; resize: vertical;
-  background: var(--panel); color: var(--ink);
-  border: 1px solid var(--line); border-radius: 8px; padding: .9rem 1rem;
-  font: 13px/1.6 var(--mono); tab-size: 2;
+  width: 100%; min-height: clamp(12rem, 34vh, 24rem); resize: vertical;
+  background: var(--panel); color: var(--fg);
+  border: var(--edge-w) solid var(--edge); border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  font: 13px/1.65 var(--font-mono); tab-size: 2;
 }
-textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+textarea::placeholder { color: var(--dim); opacity: 0.7; }
 
-table { width: 100%; border-collapse: collapse; }
-tbody tr { border-top: 1px solid var(--line); }
-tbody tr:first-child { border-top: none; }
-th { text-align: left; font-weight: 500; padding: .55rem 0; vertical-align: top; }
-td.num {
-  text-align: right; white-space: nowrap; color: var(--dim);
-  font-size: .85rem; padding: .55rem 0 .55rem 1.2rem; vertical-align: top;
-  font-variant-numeric: tabular-nums;
+/* ---- Question cards ---------------------------------------------------------------------- */
+
+.cards { list-style: none; display: grid; gap: 0.85rem; }
+.card {
+  background: var(--panel);
+  border: var(--edge-w) solid var(--edge);
+  border-left-width: 5px; border-left-color: var(--accent);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.05rem;
 }
-td.num b { color: var(--ink); font-weight: 600; }
-tr.has-questions td.num:last-child b { color: var(--warn); }
+.card-head { display: flex; gap: 0.75rem; font-size: 0.8rem; color: var(--dim); margin-bottom: 0.55rem; }
+.tag { color: var(--accent-2, var(--accent)); font-weight: 600; }
+.ln { font-variant-numeric: tabular-nums; }
 
-.disclose {
-  background: none; border: none; color: var(--ink); padding: 0;
-  font: inherit; cursor: pointer; text-align: left;
-}
-.disclose:hover { color: var(--accent); }
-.disclose::before { content: "▸ "; color: var(--dim); }
-[aria-expanded="true"].disclose::before { content: "▾ "; }
-.blurb { display: block; color: var(--dim); font-size: .8rem; margin-left: 1rem; }
-
-.sites { list-style: none; margin: .5rem 0 .3rem 1rem; padding: 0; max-height: 16rem; overflow-y: auto; }
-.sites li { display: flex; gap: .6rem; padding: .15rem 0; font-size: .8rem; color: var(--dim); }
-.sites li.flagged { color: var(--ink); }
-.sites li.flagged .ln { color: var(--warn); }
-.sites code { font-family: var(--mono); overflow-x: auto; white-space: pre; }
-.ln { color: var(--dim); font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
-.muted { color: var(--dim); font-style: italic; }
-
-.questions article {
-  border: 1px solid var(--line); border-left: 2px solid var(--warn);
-  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem; background: var(--panel);
-}
-.q-head { display: flex; gap: .75rem; font-size: .78rem; color: var(--dim); margin-bottom: .5rem; }
-.tag { color: var(--accent); }
 .construct {
-  display: block; font: 12.5px/1.6 var(--mono); color: var(--ink);
-  background: #0f1117; border-radius: 5px; padding: .5rem .65rem;
-  overflow-x: auto; white-space: pre;
+  background: var(--bg); border: 1px solid var(--edge); border-radius: 8px;
+  padding: 0.55rem 0.7rem; margin: 0 0 0.75rem;
+  overflow-x: auto; font-size: 12.5px; line-height: 1.6;
 }
-.ask { margin: .7rem 0 .5rem; }
-.cannot { margin: 0; font-size: .85rem; color: var(--dim); }
-.cannot span { color: var(--warn); }
+.ask { margin-bottom: 0.5rem; }
+.cannot { color: var(--dim); font-size: 0.88rem; }
+.cannot b { color: var(--caution, var(--warn)); font-weight: 600; }
 
-.error { color: var(--warn); font-family: var(--mono); font-size: .85rem; }
+/* ---- Coverage ---------------------------------------------------------------------------- */
 
-footer { margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .82rem; }
-footer a { color: var(--accent); }
+.coverage { list-style: none; display: grid; gap: 0.1rem; }
+.cov { border-top: 1px solid var(--edge); padding: 0.7rem 0; }
+.cov:first-child { border-top: none; }
+.cov-head {
+  width: 100%; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  background: none; border: none; padding: 0; color: var(--fg); font: inherit; font-weight: 600;
+  cursor: pointer; text-align: left;
+}
+.cov-head:hover { color: var(--accent); }
+.cov-title { display: inline-flex; align-items: center; gap: 0.45rem; }
+.chev {
+  width: 0; height: 0;
+  border-left: 6px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+  transition: transform 140ms ease;
+}
+[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.cov-nums { display: inline-flex; gap: 0.4rem; align-items: baseline; font-weight: 400; font-size: 0.86rem; color: var(--dim); }
+.cov-nums b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.cov-nums .asked { margin-left: 0.7rem; }
+.cov.flagged .cov-nums .asked { color: var(--caution, var(--warn)); }
+.cov-blurb { color: var(--dim); font-size: 0.84rem; margin: 0.2rem 0 0 1rem; }
+.cov-body { margin: 0.6rem 0 0 1rem; }
+.sites { list-style: none; display: grid; gap: 0.15rem; max-height: 20rem; overflow-y: auto; }
+.site { display: flex; gap: 0.7rem; font-size: 0.82rem; color: var(--dim); }
+.site code { font-size: 0.82rem; white-space: pre; overflow-x: auto; }
+.site.flagged { color: var(--fg); }
+.site.flagged .ln { color: var(--caution, var(--warn)); }
 
-.busy {
-  position: fixed; bottom: 1rem; right: 1rem;
-  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
-  padding: .35rem .7rem; font-size: .8rem; color: var(--dim);
+/* ---- Themes ------------------------------------------------------------------------------ */
+
+.themes { display: grid; gap: 1.4rem; }
+.theme-group { border: none; padding: 0; }
+.theme-group legend {
+  font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--dim); margin-bottom: 0.6rem;
+}
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.6rem; }
+.swatch {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  /* Each swatch paints itself in its OWN palette, because data-theme is on the button. A row of
+     chips in the current theme's colours would show fifteen identical buttons. */
+  background: var(--panel); color: var(--fg);
+  border: var(--edge-w) solid var(--edge); border-radius: var(--radius);
+  font: inherit; font-size: 0.86rem; cursor: pointer; text-align: left;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+.swatch:hover { transform: translateY(-1px); box-shadow: 0 2px 0 0 var(--edge); }
+.swatch[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.swatch-chip {
+  width: 1.15rem; height: 1.15rem; flex: none; border-radius: 5px;
+  background: var(--accent); border: 1px solid var(--edge);
+}
+.swatch-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- Prose ------------------------------------------------------------------------------- */
+
+.prose { max-width: 46rem; }
+.prose p { margin-bottom: 0.85rem; }
+.prose code {
+  background: var(--panel); border: 1px solid var(--edge); border-radius: 4px;
+  padding: 0.08em 0.32em; font-size: 0.86em;
+}
+.prose a { color: var(--accent); }
+.mini { width: 100%; border-collapse: collapse; margin: 0.6rem 0 1rem; font-size: 0.88rem; }
+.mini caption { text-align: left; color: var(--dim); font-size: 0.83rem; padding-bottom: 0.4rem; }
+.mini th, .mini td { text-align: left; padding: 0.35rem 0; border-top: 1px solid var(--edge); font-weight: 400; }
+.mini th { color: var(--dim); }
+
+.empty { place-items: start; }
+
+/* ---- Reveal on scroll -------------------------------------------------------------------- */
+
+/* Progressive: browsers without scroll-driven animations simply show the cards, which is the
+   correct fallback because the content was never hidden by default. `@supports` guards the
+   whole thing so nothing is left at opacity 0 where the timeline does not exist. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .cards .card {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 32%;
+    }
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(0.6rem); }
+      to { opacity: 1; transform: none; }
+    }
+  }
 }
 
-@media (max-width: 34rem) {
-  main { padding: 2rem 1rem 3rem; }
-  td.num { font-size: .78rem; padding-left: .6rem; }
+/* ---- Narrow ------------------------------------------------------------------------------ */
+
+@media (max-width: 56rem) {
+  .shell { grid-template-columns: 1fr; }
+  .rail { position: static; }
+  .tabs { grid-auto-flow: column; grid-auto-columns: 1fr; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .menu-btn { scroll-snap-align: start; justify-content: center; }
+  .menu-btn-label { font-size: 0.9rem; }
 }
 
-code.inline {
-  font-family: var(--mono); font-size: .8em;
-  background: #0f1117; padding: .1em .35em; border-radius: 3px; color: var(--ink);
+/* ---- Keyboard ---------------------------------------------------------------------------- */
+
+.rail-links { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.linkish {
+  background: none; border: none; padding: 0; min-height: 0;
+  color: var(--dim); font: inherit; font-size: 0.83rem; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.35rem;
 }
+.linkish:hover { color: var(--fg); }
+
+kbd {
+  font: 0.78em/1 var(--font-mono);
+  background: var(--panel); color: var(--fg);
+  border: 1px solid var(--edge); border-bottom-width: 2px; border-radius: 4px;
+  padding: 0.18em 0.4em;
+}
+
+dialog.keys {
+  background: var(--bg); color: var(--fg);
+  border: var(--edge-w) solid var(--edge); border-radius: var(--radius);
+  box-shadow: var(--lift) var(--lift) 0 0 var(--edge);
+  padding: 1.4rem 1.5rem; max-width: 26rem; width: calc(100vw - 2rem);
+}
+dialog.keys::backdrop { background: rgb(0 0 0 / 0.55); }
+dialog.keys dl { display: grid; gap: 0.55rem; margin: 0.9rem 0 1.2rem; }
+dialog.keys dl > div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0.75rem; align-items: baseline; }
+dialog.keys dt { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+dialog.keys dd { color: var(--dim); font-size: 0.88rem; }
+
+/* Links everywhere, not only inside .prose. The themes panel had one falling back to the
+   browser's default blue, which is a colour no palette here contains. */
+a { color: var(--accent); }
+a:hover { text-decoration-thickness: 2px; }

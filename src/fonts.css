@@ -1,0 +1,7 @@
+/* Self-hosted, latin subset. Served from this origin so the page keeps `font-src 'self'` and
+   loading it cannot tell a third party that somebody opened this tool. */
+@font-face { font-family: "Archivo"; src: url("/fonts/Archivo-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("/fonts/Archivo-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("/fonts/Archivo-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }

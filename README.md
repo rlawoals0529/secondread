@@ -1,14 +1,17 @@
 # secondread
 
-Paste code or a diff. It finds the constructs a reviewer has to ask a question about, states the
-question, and says what it cannot answer.
+Paste code or a diff. It shows you the things a reviewer would stop and ask about, and it tells
+you which of those it can't answer itself.
 
-![Eleven questions from a twenty-four line file, each with the line, the construct, the question, and what the check could not see](docs/screenshot.png)
+![Eleven questions found in a short file, each with its line number and the question to answer](docs/screenshot.png)
 
-It does not grade your code. Every check here works from one pasted fragment, with no callers, no
-data, no test run and no contract, and the questions worth asking about code mostly need one of
-those. So each finding carries a **Cannot see** line naming what it would have needed. A check
-that believes it can see everything is the one that reports a clean sweep of a list it barely read.
+It will not grade your code, and it is not trying to. Working from one pasted fragment means it
+cannot see the callers, the data, or whether the tests pass, and most of the questions worth
+asking need at least one of those. So every finding says what it would have needed, on a
+**Cannot see** line. That is there because a checker that acts like it saw everything is the one
+you end up trusting when it missed half the file.
+
+![The questions panel: a section menu down the left, and one card per question with its line, the construct, the question and what the check could not see](docs/screenshot.png)
 
 ## Try it
 
@@ -28,10 +31,54 @@ or a `git diff`, no install
 
 TypeScript, TSX and Python.
 
+## The interface
+
+Five sections, one panel at a time, and the whole thing is usable without a mouse.
+
+| | |
+| --- | --- |
+| <kbd>1</kbd>…<kbd>5</kbd> | jump to a section |
+| <kbd>/</kbd> | focus the paste box |
+| <kbd>Esc</kbd> | leave it again |
+| <kbd>?</kbd> | the shortcut list |
+| <kbd>←</kbd> <kbd>→</kbd> | move along the section menu |
+
+The tab strip uses a roving tabindex, so <kbd>Tab</kbd> steps over the whole menu in one press
+rather than five, and arrows move within it. Shortcuts are ignored while you are typing, because
+a shortcut that fires inside the textarea eats the character you meant.
+
+The reading runs in a **Web Worker**. Loading a 1.4MB grammar and parsing a few hundred lines is
+tens of milliseconds of solid work, and on the main thread that lands between keystrokes: the
+symptom is not a missing spinner, it is the textarea stuttering while you paste. Replies carry a
+sequence number so a slow parse of an earlier draft cannot overwrite the result for what is on
+screen now, and the previous result stays up while the next one is computed rather than the page
+flashing its own empty state on every keystroke.
+
+Two bugs this found, both invisible to anyone testing with a mouse:
+
+- The skip link moved the viewport but left focus on `body`, so the next <kbd>Tab</kbd> started
+  again at the top of the document. It needed `tabindex="-1"` on its target.
+- The shortcut list was a div. It is a real `<dialog>` opened with `showModal`, which brings
+  focus trapping, inertness for screen readers, and Escape, none of which the div had.
+
+![Fifteen palettes, each swatch painted in its own colours](docs/themes.png)
+
+Colours are [yozora](https://github.com/rlawoals0529/yozora), vendored. Fifteen palettes, eight
+light and seven dark, switched by one attribute on the root element. `color-scheme` is set
+alongside the palette rather than instead of it, or the browser keeps painting scrollbars and
+form controls for the wrong one and a light theme gets a dark scrollbar down its side. Each
+swatch carries its own `data-theme`, so it paints itself in the palette it selects instead of
+showing fifteen identical chips.
+
+Fonts are self-hosted, latin subset, so the page keeps `font-src 'self'` and opening it tells
+no third party that you did.
+
 ## The counts are the point
 
-Every check publishes what it **considered**, not only what it flagged, and the list is expandable
-so you can see its whole reach.
+Every check publishes what it **considered**, not only what it flagged, and every row opens to
+show its whole reach.
+
+![The coverage panel with the sort-keys row open, showing both sorts it found and which one it asked about](docs/coverage.png)
 
 ```
 Sort keys          13 sort calls        1 asked about
@@ -106,7 +153,7 @@ permits WASM compilation and **not** JavaScript `eval`.
 npm install
 npm run dev
 npm test      # 23 unit tests
-npm run e2e   # 4, in the browser, against the built site
+npm run e2e   # 12, in a real browser, against the built site
 npm run build # dependency and grammar gates, typecheck, then build
 ```
 
