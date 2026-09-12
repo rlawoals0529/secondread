@@ -76,25 +76,7 @@ test("the shortcut list is a real modal dialog", async ({ page }) => {
     .toBe(false);
 });
 
-test("a palette choice survives a reload", async ({ page }) => {
-  await ready(page);
-  await page.getByRole("tab", { name: "Themes" }).click();
-  await page.getByRole("button", { name: "Amethyst Yokai" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "amethyst-yokai");
-
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "amethyst-yokai");
-  // color-scheme rides along, or native scrollbars and form controls stay on the wrong one.
-  expect(await page.evaluate(() => document.documentElement.style.colorScheme)).toBe("dark");
-});
-
-test("a light palette actually repaints the page, not just a swatch", async ({ page }) => {
-  await ready(page);
-  await page.getByRole("tab", { name: "Themes" }).click();
-  const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  await page.getByRole("button", { name: "Sakura Lake" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "sakura-lake");
-  const light = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  expect(light).not.toBe(dark);
-  expect(await page.evaluate(() => document.documentElement.style.colorScheme)).toBe("light");
-});
+/* The picker is covered by e2e/palette-picker.spec.ts, vendored with the component and
+   pointed at this page through e2e/palette-open.ts. Both of the tests that were here - the
+   choice surviving a reload with its colour scheme, and the page really repainting rather
+   than only the attribute changing - are in it. */

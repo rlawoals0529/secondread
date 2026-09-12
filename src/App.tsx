@@ -3,7 +3,8 @@ import { DETECTORS } from "./analyse";
 import { SAMPLE_DIFF, SAMPLE_FILE } from "./samples";
 import { isStale, shown, useAnalysis } from "./useAnalysis";
 import { Panel, Tabs } from "./ui/Tabs";
-import { ThemePicker, useTheme } from "./ui/ThemePicker";
+import { PaletteOptions, useTheme } from "./lib/palette.js";
+import palettes from "./theme/palettes.json";
 import { Questions } from "./ui/Questions";
 import { CoverageTable } from "./ui/Coverage";
 import { About } from "./ui/About";
@@ -13,8 +14,8 @@ const TAB_IDS = ["read", "questions", "coverage", "themes", "about"];
 
 export default function App() {
   const [text, setText] = useState("");
+  const [theme, setTheme] = useTheme(palettes, "secondread:theme");
   const [tab, setTab] = useState("read");
-  const [theme, setTheme] = useTheme();
   const [helpOpen, setHelpOpen] = useState(false);
   const { state, read, reset } = useAnalysis();
   const result = shown(state);
@@ -196,7 +197,7 @@ export default function App() {
                 From <a href="https://github.com/rlawoals0529/yozora">yozora</a>, vendored. The
                 choice is kept in this browser and nowhere else.
               </p>
-              <ThemePicker theme={theme} onPick={setTheme} />
+              <PaletteOptions themes={palettes} theme={theme} onPick={setTheme} />
             </div>
           </Panel>
 
