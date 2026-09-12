@@ -31,12 +31,13 @@ code, pre, .mono { font-family: var(--font-mono); }
 /* A skip link that is genuinely reachable, not one that stays off screen because somebody
    tested it by looking rather than by pressing Tab. */
 .skip {
-  position: absolute; left: 0.5rem; top: -4rem; z-index: 100;
+  position: absolute; left: 0.5rem; top: 1rem; z-index: 100;
   background: var(--accent); color: var(--bg);
   padding: 0.6rem 1rem; border-radius: var(--radius); font-weight: 600;
-  transition: top 120ms ease;
+  transform: translateY(-200%);
+  transition: transform 120ms ease-out;
 }
-.skip:focus { top: 0.5rem; }
+.skip:focus { transform: translateY(0); }
 /* The stage takes focus from the skip link but is not a control, so it gets no ring of its own.
    Removing the outline is only safe because focus lands here on purpose and moves straight on. */
 .stage:focus { outline: none; }
@@ -202,7 +203,7 @@ textarea::placeholder { color: var(--dim); opacity: 0.7; }
 .chev {
   width: 0; height: 0;
   border-left: 6px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent;
-  transition: transform 140ms ease;
+  transition: transform 140ms ease-out;
 }
 [aria-expanded="true"] .chev { transform: rotate(90deg); }
 .cov-nums { display: inline-flex; gap: 0.4rem; align-items: baseline; font-weight: 400; font-size: 0.86rem; color: var(--dim); }
