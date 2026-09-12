@@ -11,4 +11,4 @@ export type Theme = { id: string; label: string; accent: string; scheme: "light"
 
 export const THEMES = manifest as Theme[];
 
-export const DEFAULT_THEME = "rain-lantern";
+export const DEFAULT_THEME = "twilight-comet";
