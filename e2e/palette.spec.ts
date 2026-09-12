@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { describeFailures, probeContrast } from "./contrast-probe.js";
+import themes from "../src/theme/palettes.json" with { type: "json" };
 
 /**
  * The palettes, measured where they land rather than in the token files.
@@ -13,7 +14,7 @@ test("no text on the page is below AA contrast, in any palette", async ({ page }
   await page.getByRole("tab", { name: "Themes" }).click();
   await expect(page.getByRole("radio").first()).toBeVisible();
 
-  const probe = await probeContrast(page);
+  const probe = await probeContrast(page, themes);
 
   // A selector that stopped matching would make this pass by measuring nothing.
   expect(probe.styles).toBeGreaterThan(9);
