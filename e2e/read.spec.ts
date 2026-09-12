@@ -116,8 +116,20 @@ test("a fragment with unbalanced braces is read, not refused", async ({ page }) 
 
 test("no request leaves the origin while reading code", async ({ page }) => {
   const external: string[] = [];
+  /*
+   * The origin is read off the page rather than written down. A literal host here is a test
+   * that passes because the port has not moved yet: this one named localhost:4173 and went
+   * red the day the project took a port of its own, which says nothing about the claim.
+   *
+   * This is the SECOND line, and it cannot be made to fail while the first one holds: the
+   * CSP refuses a cross-origin request before it is ever made, so no request event fires and
+   * there is nothing here to see. To prove it still works, take the CSP meta tag out of
+   * index.html and fetch something - it catches it. The CSP itself is checked below.
+   */
+  await page.goto("/");
+  const origin = new URL(page.url()).host;
   page.on("request", (r) => {
-    if (new URL(r.url()).host !== "localhost:4173") external.push(r.url());
+    if (new URL(r.url()).host !== origin) external.push(r.url());
   });
   await ready(page);
   await page.locator("textarea").fill(`const secret = 'hunter2';\n${SNIPPET}`);
@@ -146,4 +158,30 @@ test("the server under test is this app, not another app on the same port", asyn
    * Ports are unique now; this is what catches the next way it goes wrong.
    */
   await expect(page).toHaveTitle(/^secondread/);
+});
+
+test("the page declares a policy that forbids reaching the network at all", async ({ page }) => {
+  await page.goto("/");
+
+  /*
+   * The claim this page makes is that nothing leaves the browser, and the policy is what
+   * enforces it rather than promises it. Nothing else here was checking the policy existed -
+   * the request test cannot, because the policy is what stops the request it would look for.
+   */
+  const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute("content");
+  expect(policy, "no Content-Security-Policy on the page").toBeTruthy();
+
+  const directives = new Map(
+    policy!.split(";").map((d) => {
+      const [name, ...values] = d.trim().split(/\s+/);
+      return [name!, values];
+    }),
+  );
+
+  // Nothing by default, and every exception is this origin. `connect-src` is the one that
+  // decides whether pasted code can be sent anywhere.
+  expect(directives.get("default-src")).toEqual(["'none'"]);
+  expect(directives.get("connect-src")).toEqual(["'self'"]);
+  expect(directives.get("form-action")).toEqual(["'none'"]);
+  expect(directives.get("base-uri")).toEqual(["'none'"]);
 });
