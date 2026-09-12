@@ -1,0 +1,117 @@
+/**
+ * Colours and type from yozora, vendored rather than imported, so this page has no dependency
+ * on a sibling repository being reachable. The palette is its "rain lantern" variant.
+ */
+:root {
+  --bg: #14161d;
+  --panel: #1b1e27;
+  --line: #2a2e3a;
+  --ink: #d7dae4;
+  --dim: #8f96a8;
+  --accent: #7fb3d5;
+  --warn: #e0a45e;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  text-wrap: pretty;
+}
+
+main { max-width: 62rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+
+h1 { font-size: 1.6rem; margin: 0 0 .3rem; letter-spacing: -.01em; }
+h2 { font-size: 1rem; margin: 2.5rem 0 .5rem; font-weight: 600; text-wrap: balance; }
+.tagline { color: var(--dim); margin: 0 0 2rem; max-width: 46rem; }
+.note { color: var(--dim); font-size: .87rem; margin: .2rem 0 1rem; max-width: 50rem; }
+
+.editor-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  font-size: .8rem; color: var(--dim); margin-bottom: .4rem; flex-wrap: wrap;
+}
+.samples { display: flex; gap: .5rem; }
+.samples button {
+  background: none; border: 1px solid var(--line); color: var(--dim);
+  padding: .2rem .6rem; border-radius: 5px; cursor: pointer; font-size: .8rem;
+  min-height: 28px;
+}
+.samples button:hover { color: var(--ink); border-color: var(--accent); }
+
+textarea {
+  width: 100%; min-height: 15rem; resize: vertical;
+  background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 8px; padding: .9rem 1rem;
+  font: 13px/1.6 var(--mono); tab-size: 2;
+}
+textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+table { width: 100%; border-collapse: collapse; }
+tbody tr { border-top: 1px solid var(--line); }
+tbody tr:first-child { border-top: none; }
+th { text-align: left; font-weight: 500; padding: .55rem 0; vertical-align: top; }
+td.num {
+  text-align: right; white-space: nowrap; color: var(--dim);
+  font-size: .85rem; padding: .55rem 0 .55rem 1.2rem; vertical-align: top;
+  font-variant-numeric: tabular-nums;
+}
+td.num b { color: var(--ink); font-weight: 600; }
+tr.has-questions td.num:last-child b { color: var(--warn); }
+
+.disclose {
+  background: none; border: none; color: var(--ink); padding: 0;
+  font: inherit; cursor: pointer; text-align: left;
+}
+.disclose:hover { color: var(--accent); }
+.disclose::before { content: "▸ "; color: var(--dim); }
+[aria-expanded="true"].disclose::before { content: "▾ "; }
+.blurb { display: block; color: var(--dim); font-size: .8rem; margin-left: 1rem; }
+
+.sites { list-style: none; margin: .5rem 0 .3rem 1rem; padding: 0; max-height: 16rem; overflow-y: auto; }
+.sites li { display: flex; gap: .6rem; padding: .15rem 0; font-size: .8rem; color: var(--dim); }
+.sites li.flagged { color: var(--ink); }
+.sites li.flagged .ln { color: var(--warn); }
+.sites code { font-family: var(--mono); overflow-x: auto; white-space: pre; }
+.ln { color: var(--dim); font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+.muted { color: var(--dim); font-style: italic; }
+
+.questions article {
+  border: 1px solid var(--line); border-left: 2px solid var(--warn);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem; background: var(--panel);
+}
+.q-head { display: flex; gap: .75rem; font-size: .78rem; color: var(--dim); margin-bottom: .5rem; }
+.tag { color: var(--accent); }
+.construct {
+  display: block; font: 12.5px/1.6 var(--mono); color: var(--ink);
+  background: #0f1117; border-radius: 5px; padding: .5rem .65rem;
+  overflow-x: auto; white-space: pre;
+}
+.ask { margin: .7rem 0 .5rem; }
+.cannot { margin: 0; font-size: .85rem; color: var(--dim); }
+.cannot span { color: var(--warn); }
+
+.error { color: var(--warn); font-family: var(--mono); font-size: .85rem; }
+
+footer { margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .82rem; }
+footer a { color: var(--accent); }
+
+.busy {
+  position: fixed; bottom: 1rem; right: 1rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: .35rem .7rem; font-size: .8rem; color: var(--dim);
+}
+
+@media (max-width: 34rem) {
+  main { padding: 2rem 1rem 3rem; }
+  td.num { font-size: .78rem; padding-left: .6rem; }
+}
+
+code.inline {
+  font-family: var(--mono); font-size: .8em;
+  background: #0f1117; padding: .1em .35em; border-radius: 3px; color: var(--ink);
+}
