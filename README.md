@@ -37,6 +37,7 @@ Five sections, one panel at a time, and the whole thing is usable without a mous
 
 | | |
 | --- | --- |
+| <kbd>⌘</kbd><kbd>↵</kbd> | read what is in the box |
 | <kbd>1</kbd>…<kbd>5</kbd> | jump to a section |
 | <kbd>/</kbd> | focus the paste box |
 | <kbd>Esc</kbd> | leave it again |
@@ -45,7 +46,23 @@ Five sections, one panel at a time, and the whole thing is usable without a mous
 
 The tab strip uses a roving tabindex, so <kbd>Tab</kbd> steps over the whole menu in one press
 rather than five, and arrows move within it. Shortcuts are ignored while you are typing, because
-a shortcut that fires inside the textarea eats the character you meant.
+a shortcut that fires inside the textarea eats the character you meant. The one exception is
+<kbd>⌘</kbd><kbd>↵</kbd>, which has to work from inside the box, since that is where you are when
+you finish pasting. It is modified, so it cannot swallow a plain <kbd>↵</kbd> in the middle of
+code.
+
+### Reading is something you ask for
+
+It used to re-read on a debounce, and loading a sample jumped you straight to the answers. Both
+were wrong in the same way: the page moved without being asked, and the code you had just loaded
+was on a panel you were no longer looking at.
+
+Now a sample fills the box and stays there, scrolled to the top rather than to wherever the caret
+landed, and one button reads it. Editing afterwards does not silently invalidate what is on
+screen: the previous answers stay readable and are labelled as being for the previous text, since
+throwing them away takes something the reader may still be using.
+
+![The read panel: a loaded sample, and one button to read it](docs/read.png)
 
 The reading runs in a **Web Worker**. Loading a 1.4MB grammar and parsing a few hundred lines is
 tens of milliseconds of solid work, and on the main thread that lands between keystrokes: the

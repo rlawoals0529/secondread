@@ -5,19 +5,23 @@ import type { State } from "../useAnalysis";
 export function Questions({
   state,
   result,
-  onPaste,
+  stale,
+  onGoRead,
+  onReadAgain,
 }: {
   state: State;
   result: Analysis | null;
-  onPaste: () => void;
+  stale: boolean;
+  onGoRead: () => void;
+  onReadAgain: () => void;
 }) {
-  if (state.status === "empty") {
+  if (state.status === "idle") {
     return (
       <div className="stack empty">
         <h2>Nothing read yet</h2>
-        <p className="hint">Paste something and the questions land here.</p>
-        <button className="menu-btn" onClick={onPaste}>
-          <span className="menu-btn-label">Go and paste</span>
+        <p className="hint">Paste something in Read, then press the button.</p>
+        <button className="menu-btn" onClick={onGoRead}>
+          <span className="menu-btn-label">Go to Read</span>
         </button>
       </div>
     );
@@ -40,8 +44,17 @@ export function Questions({
         <h2>
           {q.length} question{q.length === 1 ? "" : "s"}
         </h2>
-        {state.status === "reading" && <span className="pill quiet">re-reading…</span>}
+        {state.status === "reading" && <span className="pill quiet">reading…</span>}
       </div>
+
+      {stale && (
+        <div className="stale-banner" role="status">
+          <p>These are for the previous text. The box has been edited since.</p>
+          <button className="pill" onClick={onReadAgain}>
+            read it again
+          </button>
+        </div>
+      )}
 
       {/*
         Announced once, politely, rather than per card. A live region that fires on every item

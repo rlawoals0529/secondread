@@ -323,3 +323,26 @@ dialog.keys dd { color: var(--dim); font-size: 0.88rem; }
    browser's default blue, which is a colour no palette here contains. */
 a { color: var(--accent); }
 a:hover { text-decoration-thickness: 2px; }
+
+/* ---- Submit ------------------------------------------------------------------------------ */
+
+.submit-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.menu-btn.go { width: auto; min-width: 13rem; --btn-bg: var(--accent); color: var(--bg); border-color: var(--accent); }
+.menu-btn.go:hover:not(:disabled) { --btn-bg: color-mix(in srgb, var(--accent) 85%, var(--fg)); }
+.menu-btn.go kbd { background: color-mix(in srgb, var(--bg) 25%, transparent); border-color: color-mix(in srgb, var(--bg) 40%, transparent); color: inherit; }
+
+/* Disabled says "not yet", so it keeps its shape and loses its pull rather than vanishing. */
+.menu-btn:disabled {
+  cursor: not-allowed; opacity: 0.55;
+  --btn-bg: var(--panel); color: var(--dim); border-color: var(--edge);
+  box-shadow: 0 0 0 0 var(--edge); transform: none;
+}
+
+.stale { color: var(--caution, var(--warn)); font-size: 0.85rem; }
+.stale-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  padding: 0.6rem 0.85rem;
+  background: color-mix(in srgb, var(--caution, var(--warn)) 12%, var(--panel));
+  border: 1px solid var(--caution, var(--warn)); border-radius: var(--radius);
+  font-size: 0.88rem;
+}

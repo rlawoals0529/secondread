@@ -1,6 +1,10 @@
 import { useEffect, useRef } from "react";
 
+const MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+const MOD = MAC ? "⌘" : "Ctrl";
+
 export const KEYS = [
+  { keys: [MOD, "↵"], does: "read what is in the box" },
   { keys: ["1", "…", "5"], does: "jump to a section" },
   { keys: ["/"], does: "focus the paste box" },
   { keys: ["Esc"], does: "leave the paste box" },
@@ -20,6 +24,7 @@ export function useShortcuts(handlers: {
   onSection: (i: number) => void;
   onFocusPaste: () => void;
   onToggleHelp: () => void;
+  onSubmit: () => void;
 }) {
   const ref = useRef(handlers);
   ref.current = handlers;
@@ -29,6 +34,13 @@ export function useShortcuts(handlers: {
       const el = e.target as HTMLElement | null;
       const typing = !!el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT" || el.isContentEditable);
 
+      // The one binding that must work from inside the box, because that is where you are when
+      // you finish pasting. Modified, so it cannot eat a plain Enter in the middle of code.
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        ref.current.onSubmit();
+        return;
+      }
       if (typing) {
         if (e.key === "Escape") (el as HTMLElement).blur();
         return;

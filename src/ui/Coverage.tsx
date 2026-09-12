@@ -8,14 +8,22 @@ import type { Detector } from "../question";
  * Rendered as a real disclosure per row rather than a modal, because the useful action is
  * comparing two rows, and a modal makes you close one to see the next.
  */
-export function CoverageTable({ result, detectors }: { result: Analysis | null; detectors: Detector[] }) {
+export function CoverageTable({
+  result,
+  detectors,
+  stale,
+}: {
+  result: Analysis | null;
+  detectors: Detector[];
+  stale: boolean;
+}) {
   const [open, setOpen] = useState<string | null>(null);
 
   if (!result) {
     return (
       <div className="stack empty">
         <h2>Nothing read yet</h2>
-        <p className="hint">Paste something and each check reports what it looked at.</p>
+        <p className="hint">Read something and each check reports what it looked at.</p>
       </div>
     );
   }
@@ -27,6 +35,12 @@ export function CoverageTable({ result, detectors }: { result: Analysis | null; 
         A check reporting nothing says nothing until you know how much it read. Open a row to see
         every construct it considered, and compare that against what you know is in the code.
       </p>
+
+      {stale && (
+        <p className="stale" role="status">
+          These counts are for the previous text.
+        </p>
+      )}
 
       <ul className="coverage">
         {result.coverage.map((c) => {
