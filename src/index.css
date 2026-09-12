@@ -1,7 +1,8 @@
-@import "./yozora/base.css";
-@import "./yozora/palettes.css";
-@import "./yozora/texture.css";
-@import "./yozora/motion.css";
+@import "./theme/base.css";
+@import "./theme/palettes.css";
+@import "./theme/type.css";
+@import "./theme/texture.css";
+@import "./theme/motion.css";
 @import "./fonts.css";
 
 /* ------------------------------------------------------------------------------------------
@@ -10,11 +11,9 @@
    you wrote a hex somewhere.
    ------------------------------------------------------------------------------------------ */
 
+/* The font variables come from theme/type.css, which yozora generated. They are not repeated
+   here: a second copy is a second thing to update when the pairing changes. */
 :root {
-  --font-display: "Archivo", "Segoe UI Variable Display", system-ui, sans-serif;
-  --font-body: "Archivo", "Segoe UI Variable", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-
   /* The hard offset shadow that makes a control look pressable rather than printed. No blur:
      blur reads as elevation, offset reads as a physical edge, and this is the second one. */
   --lift: 4px;
